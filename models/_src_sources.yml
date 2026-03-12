@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: raw_src
+    database: saas-pipeline
+    schema: raw_src
+    tables:
+      - name: customers
+      - name: plans
+      - name: subscriptions
+      - name: invoices
+      - name: line_items
+      - name: payments
+      - name: products
+      - name: subscription_discounts
+      - name: discounts
