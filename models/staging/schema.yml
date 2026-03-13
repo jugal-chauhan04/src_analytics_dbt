@@ -123,3 +123,53 @@ models:
         description: "The current status of the invoice"
         tests:
           - not_null
+  
+  - name: stg__payments
+    description: "Staging table for payment data ingested from the raw source. This model cleans and standardizes payment information for downstream use."
+    columns:
+      - name: payment_id
+        data_type: int64
+        description: "Unique ID for each payment record"
+        tests:
+          - unique
+          - not_null
+
+      - name: invoice_id
+        data_type: int64
+        description: "The invoice associated with this payment"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg__invoices')
+                field: invoice_id
+
+      - name: payment_date
+        data_type: date
+        description: "Date when the payment was made"
+        tests:
+          - not_null
+
+      - name: amount_paid
+        data_type: float64
+        description: "The amount paid for the invoice"
+        tests:
+          - not_null
+
+      - name: payment_method
+        data_type: string
+        description: "The method used to make the payment"
+        tests:
+          - not_null
+          - accepted_values:
+                arguments:
+                  values: ['Credit', 'Debit', 'Paypal', 'N/A']
+
+      - name: payment_status
+        data_type: string
+        description: "The current status of the payment"
+        tests:
+          - not_null
+          - accepted_values:
+                arguments:
+                  values: ['success', 'pending', 'failed']
