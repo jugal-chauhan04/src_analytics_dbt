@@ -39,6 +39,7 @@ models:
 
   - name: stg__subscriptions
     description: "Staging table for subscription data ingested from the raw source. This model cleans and standardizes subscription information for downstream use."
+
     columns:
       - name: subscription_id
         data_type: int64
@@ -104,7 +105,6 @@ models:
               arguments:
                 to: ref('stg__subscriptions')
                 field: subscription_id
-
 
       - name: invoice_date
         data_type: date
@@ -216,3 +216,36 @@ models:
         description: "The type of the line item"
         tests:
           - not_null
+
+  - name: stg__subscription_discounts
+    description: "Staging table for subscription discount data ingested from the raw source. This model cleans and standardizes subscription discount information for downstream use."
+    columns:
+      - name: subscription_discount_id
+        data_type: int64
+        description: "Unique ID for each subscription discount record"
+        tests:
+          - unique
+          - not_null
+          
+      - name: subscription_id
+        data_type: int64
+        description: "The subscription associated with this discount"
+        tests:
+          - not_null
+
+      - name: discount_id
+        data_type: int64
+        description: "The discount associated with this subscription"
+        tests:
+          - not_null
+
+
+      - name: applied_date
+        data_type: date
+        description: "The date when the discount was applied"
+        tests:
+          - not_null
+
+      - name: expiry_date
+        data_type: date
+        description: "The date when the discount expires"
