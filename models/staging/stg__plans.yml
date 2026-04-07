@@ -1,0 +1,45 @@
+version: 2
+models:
+    - name: stg__plans
+      description: "Staging table for plan data ingested from the raw source. This model cleans and standardizes plan information for downstream use."
+      columns:
+      - name: plan_id
+        data_type: int64
+        description: "Primary key for the plan record"
+        tests:
+          - unique
+          - not_null
+
+      - name: product_id
+        data_type: int64
+        description: "The product associated with the plan"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg__products')
+                field: product_id
+
+      - name: plan_name
+        data_type: string
+        description: "The name of the plan"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Free', 'Pro', 'Premium']
+
+      - name: plan_price
+        data_type: float64
+        description: "The price of the plan"
+        tests:
+          - not_null
+
+      - name: billing_type
+        data_type: string
+        description: "Specifies whether the plan is billed on a monthly or yearly basis"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['monthly', 'yearly']

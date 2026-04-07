@@ -1,0 +1,34 @@
+version: 2
+models:
+  - name: stg__subscription_discounts
+    description: "Staging table for subscription discount data ingested from the raw source. This model cleans and standardizes subscription discount information for downstream use."
+    columns:
+      - name: subscription_discount_id
+        data_type: int64
+        description: "Unique ID for each subscription discount record"
+        tests:
+          - unique
+          - not_null
+          
+      - name: subscription_id
+        data_type: int64
+        description: "The subscription associated with this discount"
+        tests:
+          - not_null
+
+      - name: discount_id
+        data_type: int64
+        description: "The discount associated with this subscription"
+        tests:
+          - not_null
+
+
+      - name: applied_date
+        data_type: date
+        description: "The date when the discount was applied"
+        tests:
+          - not_null
+
+      - name: expiry_date
+        data_type: date
+        description: "The date when the discount expires"

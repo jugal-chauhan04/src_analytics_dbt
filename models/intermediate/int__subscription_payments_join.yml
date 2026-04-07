@@ -1,0 +1,37 @@
+version: 2
+models:
+  - name: int__subscription_payments_join
+    description: "Intermediate model that joins subscription, payment, and discount data to create a comprehensive view of subscription payments. This model serves as a foundation for further analysis and reporting on subscription revenue and customer behavior."
+    columns:
+      - name: subscription_id
+        data_type: int64
+        description: "Unique ID for each subscription"
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        data_type: int64
+        description: "Unique ID for each customer"
+        tests:
+          - not_null
+
+      - name: product_id
+        data_type: int64
+        description: "Unique ID for each product"
+        tests:
+          - not_null
+
+      - name: payment_id
+        data_type: int64
+        description: "Unique ID for each payment"
+        tests:
+          - not_null
+
+      - name: discount_amount
+        data_type: decimal
+        description: "The amount of discount applied to the subscription payment"
+
+      - name: payment_amount
+        data_type: decimal
+        description: "The total amount paid after applying discounts"

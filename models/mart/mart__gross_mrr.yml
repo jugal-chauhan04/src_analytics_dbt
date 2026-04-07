@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: mart__gross_mrr
+    description: >
+      Grain: one row per billing_month per product_id, plan_id, and billing_type.
+
+      Gross MRR is the revenue expected from active subscriptions at full list price,
+      before any discounts. Yearly plan prices are divided by 12 to produce a monthly figure.
+
+      Upstream: int__mrr_join
+    columns:
+      - name: billing_month
+        description: "Calendar month this row represents, normalized to first of month (e.g. 2024-01-01)"
+
+      - name: product_id
+        description: "The product associated with this MRR contribution"
+
+      - name: plan_id
+        description: "The plan associated with this MRR contribution"
+
+      - name: plan_name
+        description: "Name of the plan (Free, Pro, Premium)"
+
+      - name: billing_type
+        description: "Whether the plan is billed monthly or yearly"
+
+      - name: gross_mrr
+        description: >
+          Total plan list price for this billing month and dimension combination, before any discounts.
+          Derived from plan_price. Yearly amounts divided by 12 to normalize to a monthly figure.

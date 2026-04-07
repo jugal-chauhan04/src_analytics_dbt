@@ -1,0 +1,44 @@
+version: 2
+models:
+  - name: stg__line_items
+    description: "Staging table for line item data ingested from the raw source. This model cleans and standardizes line item information for downstream use."
+    columns:
+      - name: line_item_id
+        data_type: int64
+        description: "Unique ID for each line item"
+        tests:
+          - unique
+          - not_null
+
+      - name: invoice_id
+        data_type: int64
+        description: "The invoice associated with this line item"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg__invoices')
+                field: invoice_id
+
+
+      - name: plan_id
+        data_type: int64
+        description: "The plan associated with this line item" 
+
+      - name: balance_adjustment
+        data_type: float64
+        description: "The amount by which the line item adjusts the total invoice amount"
+        tests:
+          - not_null
+
+      - name: adjustment_description
+        data_type: string
+        description: "A description of the adjustment made to the line item"
+        tests:
+          - not_null
+
+      - name: line_type
+        data_type: string
+        description: "The type of the line item"
+        tests:
+          - not_null

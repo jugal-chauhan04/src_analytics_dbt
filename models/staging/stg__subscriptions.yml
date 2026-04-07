@@ -1,0 +1,51 @@
+version: 2
+models:
+  - name: stg__subscriptions
+    description: "Staging table for subscription data ingested from the raw source. This model cleans and standardizes subscription information for downstream use."
+
+    columns:
+      - name: subscription_id
+        data_type: int64
+        description: "Unique ID for each subscription record"
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        data_type: int64
+        description: "The customer associated with this subscription"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg__customers')
+                field: customer_id
+
+      - name: plan_id
+        data_type: int64
+        description: "The plan this subscription belongs to"
+        tests:
+          - not_null
+
+      - name: start_date
+        data_type: date
+        description: "Date when the subscription started"
+        tests:
+          - not_null
+
+      - name: end_date
+        data_type: date
+        description: "Date when the subscription ended"
+
+      - name: status
+        data_type: string
+        description: "Current status of the subscription"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['active', 'cancelled', 'upgraded', 'downgraded']
+
+      - name: cancel_date
+        data_type: date
+        description: "Date when the subscription was cancelled"

@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: int__subscription_plan_join
+    description: "One row per subscription enriched with plan metadata. 
+                  Pure join layer - no calculations, no date generation."
+    columns:
+      - name: customer_id
+        description: "The customer associated with this subscription"
+      - name: subscription_id
+        description: "Unique ID for each subscription"  
+      - name: plan_id
+        description: "The plan this subscription belongs to"
+      - name: product_id
+        description: "The product this subscription belongs to"
+      - name: plan_name
+        description: "Name of the plan this subscription belongs to"
+      - name: plan_price
+        description: "Price of the plan this subscription belongs to"
+      - name: start_date
+        description: "Date when the subscription started"
+      - name: end_date
+        description: "Date when the subscription ended"
+      - name: cancel_date
+        description: "Date when the subscription was cancelled"
+      - name: status
+        description: "Current status of the subscription"
+      - name: billing_type
+        description: "Whether the plan is billed monthly or yearly"

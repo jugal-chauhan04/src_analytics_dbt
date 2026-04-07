@@ -1,0 +1,38 @@
+version: 2
+models:
+  - name: stg__invoices
+    description: "Staging table for invoice data ingested from the raw source. This model cleans and standardizes invoice information for downstream use."
+    columns:
+      - name: invoice_id
+        data_type: int64
+        description: "Unique ID for each invoice"
+        tests:
+          - not_null
+
+      - name: subscription_id
+        data_type: int64
+        description: "The subscription associated with this invoice"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg__subscriptions')
+                field: subscription_id
+
+      - name: invoice_date
+        data_type: date
+        description: "Date when the invoice was generated"
+        tests:
+          - not_null
+
+      - name: amount_due
+        data_type: float64
+        description: "The amount due on the invoice after discounts"
+        tests:
+          - not_null
+
+      - name: invoice_status
+        data_type: string
+        description: "The current status of the invoice"
+        tests:
+          - not_null

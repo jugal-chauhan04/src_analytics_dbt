@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: mart__collected_mrr
+    description: >
+      Grain: one row per billing_month per product_id, plan_id, and billing_type.
+
+      Collected MRR is the revenue actually received — successful payments only.
+      Failed and pending payment attempts are excluded. Yearly payment amounts
+      are divided by 12 to produce a monthly figure.
+
+      Upstream: int__subscription_payments_join
+    columns:
+      - name: billing_month
+        description: "Calendar month this row represents, normalized to first of month (e.g. 2024-01-01)"
+
+      - name: product_id
+        description: "The product associated with this MRR contribution"
+
+      - name: plan_id
+        description: "The plan associated with this MRR contribution"
+
+      - name: plan_name
+        description: "Name of the plan (Free, Pro, Premium)"
+
+      - name: billing_type
+        description: "Whether the plan is billed monthly or yearly"
+
+      - name: collected_mrr
+        description: >
+          Total successfully collected payment amounts for this billing month and dimension combination.
+          Only includes payments with payment_status = 'success'. Yearly amounts divided by 12
+          to normalize to a monthly figure. NULL where no successful payment was collected for a
+          subscription in this month.

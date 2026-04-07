@@ -1,0 +1,68 @@
+version: 2
+models:
+  - name: stg__discounts
+    description: "Staging table for discount data ingested from the raw source. This model cleans and standardizes discount information for downstream use."
+    columns:
+      - name: discount_id
+        data_type: int64
+        description: "Unique ID for each discount record"
+        tests:
+          - unique
+          - not_null
+
+      - name: discount_code
+        data_type: string
+        description: "The code for the discount"
+        tests:
+          - not_null
+          - unique
+
+      - name: discount_type
+        data_type: string
+        description: "The type of the discount whether percentage or fixed amount"
+        tests:
+          - not_null
+
+      - name: discount_value
+        data_type: float64
+        description: "The value of the discount"
+        tests:
+          - not_null
+
+
+      - name: discount_valid_from
+        data_type: date
+        description: "Discount validity start date"
+        tests:
+          - not_null
+
+
+      - name: discount_valid_to
+        data_type: date
+        description: "Discount validity end date"
+        tests:
+          - not_null
+
+      - name: product_id
+        data_type: int64
+        description: "Specifies if discount is associated with a specific product"
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg__products')
+                field: product_id
+
+      - name: plan_id
+        data_type: int64
+        description: "Specifies if discount is associated with a specific plan"
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg__plans')
+                field: plan_id
+
+      - name: is_recurring
+        data_type: boolean
+        description: "Indicates if the discount is recurring or one-time"
+        tests:
+          - not_null

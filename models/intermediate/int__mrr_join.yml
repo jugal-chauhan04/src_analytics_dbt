@@ -1,0 +1,76 @@
+version: 2
+
+models:
+  - name: int__mrr_join
+    description: >
+      Grain: subscription_id + billing_month.
+
+      Builds a monthly spine for each subscription using GENERATE_DATE_ARRAY + UNNEST,
+      then joins invoices onto it. Carries both gross and net monthly amounts so that
+      mart__gross_mrr and mart__net_mrr can both be built from this single model
+      without duplicating the spine logic.
+
+      GENERATE_DATE_ARRAY produces one date per calendar month between a subscription's
+      start and end. UNNEST expands that array into individual rows — one per month.
+      For example, a subscription running Jan - Mar 2024 produces:
+
+        subscription_id | billing_month
+        101             | 2024-01-01
+        101             | 2024-02-01
+        101             | 2024-03-01
+
+      For yearly subscriptions, the invoice join uses integer division to find which
+      subscription year a billing_month belongs to, then matches it to the invoice
+      from the start of that year. This means all 12 months in a subscription year
+      map to the same invoice, and amounts are divided by 12 to produce a monthly figure.
+
+      Gross amount uses plan_price (pre-discount). Net amount uses invoice amount_due
+      (post-discount).
+
+      Upstream: int__subscription_plan_join, stg__invoices
+      Downstream: mart__gross_mrr, mart__net_mrr
+    columns:
+      - name: subscription_id
+        description: "The subscription contributing MRR in this month"
+
+      - name: customer_id
+        description: "The customer associated with this subscription"
+
+      - name: plan_id
+        description: "The plan associated with this subscription"
+
+      - name: product_id
+        description: "The product associated with this subscription"
+
+      - name: plan_name
+        description: "Name of the plan (Free, Pro, Premium)"
+
+      - name: billing_type
+        description: "Whether the plan is billed monthly or yearly"
+
+      - name: billing_month
+        description: "The calendar month this row represents, normalized to first of month (e.g. 2024-01-01)"
+
+      - name: status
+        description: "Status of the subscription (active, cancelled, upgraded, downgraded)"
+
+      - name: invoice_id
+        description: >
+          The invoice associated with this billing month. For monthly subscriptions,
+          matched to the invoice issued in the same calendar month. For yearly
+          subscriptions, matched to the invoice issued at the start of the subscription
+          year that contains this billing_month. NULL if no invoice exists for this month.
+
+      - name: invoice_status
+        description: "Current status of the matched invoice (paid, past_due). NULL if no invoice matched."
+
+      - name: gross_monthly_amount
+        description: >
+          Monthly MRR contribution based on plan_price before any discounts.
+          Yearly plan_price divided by 12, monthly plan_price used as-is.
+
+      - name: net_monthly_amount
+        description: >
+          Monthly MRR contribution based on invoice amount_due after discounts.
+          Yearly amount_due divided by 12, monthly amount_due used as-is.
+          NULL if no invoice was matched for this month.
