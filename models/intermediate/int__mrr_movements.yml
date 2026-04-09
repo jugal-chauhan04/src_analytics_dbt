@@ -5,13 +5,17 @@ models:
     description: >
       Intermediate model that classifies every subscription event into an MRR 
       movement type. One row per subscription event per movement type.
+
       Grain: subscription_id + movement_type.
+
       Feeds into mart__mrr_movements where amounts are aggregated into wide format
       by billing_month, product, plan, and billing_type.
+
       Four movement types are captured: new_mrr (genuinely new subscriptions, 
       excludes upgrade/downgrade created subscriptions), expansion_mrr (upgrades 
       to higher priced plans), contraction_mrr (downgrades to lower priced plans), 
       churned_mrr (cancellations). Reactivation MRR is out of scope.
+      
       All movement amounts are positive — the mart applies sign convention.
       Yearly plan amounts are divided by 12 to normalise to a monthly figure.
       Upstream: int__subscription_plan_join.

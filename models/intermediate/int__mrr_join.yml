@@ -29,32 +29,50 @@ models:
 
       Upstream: int__subscription_plan_join, stg__invoices
       Downstream: mart__gross_mrr, mart__net_mrr
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - subscription_id
+              - billing_month
+
     columns:
       - name: subscription_id
+        data_type: int64
         description: "The subscription contributing MRR in this month"
 
+
       - name: customer_id
+        data_type: int64
         description: "The customer associated with this subscription"
 
       - name: plan_id
+        data_type: int64
         description: "The plan associated with this subscription"
 
       - name: product_id
+        data_type: int64
         description: "The product associated with this subscription"
 
       - name: plan_name
+        data_type: string
         description: "Name of the plan (Free, Pro, Premium)"
 
       - name: billing_type
+        data_type: string
         description: "Whether the plan is billed monthly or yearly"
 
       - name: billing_month
+        data_type: date
         description: "The calendar month this row represents, normalized to first of month (e.g. 2024-01-01)"
 
       - name: status
+        data_type: string
         description: "Status of the subscription (active, cancelled, upgraded, downgraded)"
 
       - name: invoice_id
+        data_type: int64
         description: >
           The invoice associated with this billing month. For monthly subscriptions,
           matched to the invoice issued in the same calendar month. For yearly
@@ -62,14 +80,17 @@ models:
           year that contains this billing_month. NULL if no invoice exists for this month.
 
       - name: invoice_status
+        data_type: string
         description: "Current status of the matched invoice (paid, past_due). NULL if no invoice matched."
 
       - name: gross_monthly_amount
+        data_type: float64
         description: >
           Monthly MRR contribution based on plan_price before any discounts.
           Yearly plan_price divided by 12, monthly plan_price used as-is.
 
       - name: net_monthly_amount
+        data_type: float64
         description: >
           Monthly MRR contribution based on invoice amount_due after discounts.
           Yearly amount_due divided by 12, monthly amount_due used as-is.
