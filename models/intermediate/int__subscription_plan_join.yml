@@ -1,28 +1,49 @@
 version: 2
+
 models:
   - name: int__subscription_plan_join
-    description: "One row per subscription enriched with plan metadata. 
-                  Pure join layer - no calculations, no date generation."
+    description: >
+      Grain: one row per subscription_id.
+
+      Pure enrichment join — brings plan metadata onto each subscription record.
+      No date generation, no calculations. Exists as a shared foundation so that
+      int__mrr_join and int__subscription_payments_join don't each repeat the
+      same join logic independently.
+
+      Upstream: stg__subscriptions, stg__plans
+      Downstream: int__mrr_join, int__subscription_payments_join
     columns:
+      - name: subscription_id
+        description: "Unique ID for each subscription"
+
       - name: customer_id
         description: "The customer associated with this subscription"
-      - name: subscription_id
-        description: "Unique ID for each subscription"  
+
       - name: plan_id
         description: "The plan this subscription belongs to"
+
       - name: product_id
-        description: "The product this subscription belongs to"
+        description: "The product associated with this subscription's plan"
+
       - name: plan_name
-        description: "Name of the plan this subscription belongs to"
+        description: "Name of the plan (Free, Pro, Premium)"
+
       - name: plan_price
-        description: "Price of the plan this subscription belongs to"
-      - name: start_date
-        description: "Date when the subscription started"
-      - name: end_date
-        description: "Date when the subscription ended"
-      - name: cancel_date
-        description: "Date when the subscription was cancelled"
-      - name: status
-        description: "Current status of the subscription"
+        description: >
+          List price of the plan before any discounts. For yearly plans this is
+          the annual amount; for monthly plans this is the monthly amount.
+
       - name: billing_type
         description: "Whether the plan is billed monthly or yearly"
+
+      - name: start_date
+        description: "Date when the subscription started"
+
+      - name: end_date
+        description: "Date when the subscription ended"
+
+      - name: cancel_date
+        description: "Date when the subscription was cancelled. NULL if not cancelled."
+
+      - name: status
+        description: "Current status of the subscription (active, cancelled, upgraded, downgraded)"

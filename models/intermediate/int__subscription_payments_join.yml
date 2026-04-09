@@ -1,37 +1,75 @@
 version: 2
+
 models:
   - name: int__subscription_payments_join
-    description: "Intermediate model that joins subscription, payment, and discount data to create a comprehensive view of subscription payments. This model serves as a foundation for further analysis and reporting on subscription revenue and customer behavior."
+    description: >
+      One row per subscription per active calendar month, enriched with successfully
+      collected payment amounts.
+      
+      Grain: subscription_id + billing_month.
+
+      The spine is generated using GENERATE_DATE_ARRAY + UNNEST to explode each
+      subscription into one row per calendar month between its start date and end
+      date (or cancel_date, or current_date if still active). This approach anchors
+      MRR to subscription periods rather than invoice dates, which correctly handles
+      mid-period cancellations, invoice date drift, and upgrades or downgrades.
+
+      Payments are pre-aggregated to one row per invoice before joining to the spine.
+      This is necessary because a single invoice can have multiple payment attempts
+      (retries). Summing only successful payments before the join prevents double
+      counting collected amounts.
+
+      For yearly subscriptions, the invoice join uses integer division to identify
+      which subscription year a given billing_month falls into, then anchors back
+      to the invoice issued at the start of that year. This ensures each billing_month
+      correctly maps to exactly one yearly invoice regardless of how far into the
+      subscription term the month falls.
+
+      Yearly collected amounts are divided by 12 to normalize to a monthly figure,
+      consistent with the gross and net MRR spines.
+
+      Upstream: int__subscription_plan_join, stg__invoices, stg__payments
+      Downstream: mart__collected_mrr
     columns:
       - name: subscription_id
-        data_type: int64
-        description: "Unique ID for each subscription"
-        tests:
-          - unique
-          - not_null
+        description: "The subscription contributing collected MRR in this month"
 
       - name: customer_id
-        data_type: int64
-        description: "Unique ID for each customer"
-        tests:
-          - not_null
+        description: "The customer associated with this subscription"
+
+      - name: plan_id
+        description: "The plan associated with this subscription"
 
       - name: product_id
-        data_type: int64
-        description: "Unique ID for each product"
-        tests:
-          - not_null
+        description: "The product associated with this subscription"
 
-      - name: payment_id
-        data_type: int64
-        description: "Unique ID for each payment"
-        tests:
-          - not_null
+      - name: plan_name
+        description: "Name of the plan (Free, Pro, Premium)"
 
-      - name: discount_amount
-        data_type: decimal
-        description: "The amount of discount applied to the subscription payment"
+      - name: billing_type
+        description: "Whether the plan is billed monthly or yearly"
 
-      - name: payment_amount
-        data_type: decimal
-        description: "The total amount paid after applying discounts"
+      - name: billing_month
+        description: "The calendar month this row represents, normalized to first of month (e.g. 2024-01-01)"
+
+      - name: status
+        description: "Status of the subscription (active, cancelled, upgraded, downgraded)"
+
+      - name: invoice_id
+        description: >
+          The invoice associated with this billing month. For monthly subscriptions,
+          matched directly to the invoice issued in the same calendar month. For yearly
+          subscriptions, matched to the invoice issued at the start of the subscription
+          year that contains this billing_month. NULL if no successful payment exists
+          for this month.
+
+      - name: invoice_status
+        description: "Current status of the matched invoice (paid, past_due). NULL if no invoice matched."
+
+      - name: collected_monthly_amount
+        description: >
+          The successfully collected payment amount for this billing month.
+          Only includes payments with payment_status = 'success'. Multiple payment
+          attempts per invoice are summed before joining to prevent double counting.
+          Yearly collected amounts are divided by 12 to normalize to a monthly figure.
+          NULL if no successful payment was collected for this month.

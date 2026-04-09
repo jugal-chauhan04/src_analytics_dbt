@@ -1,0 +1,76 @@
+version: 2
+
+models:
+  - name: mart__movements_mrr
+    description: >
+      Monthly MRR movements aggregated by billing month and plan dimensions.
+
+      Grain: one row per billing_month per product_id, plan_id, and billing_type.
+
+      This model explains why gross MRR changed month over month by decomposing
+      it into four movement types: new subscriptions, cancellations, upgrades,
+      and downgrades.
+      
+      All amounts are gross MRR — pre-discount plan prices
+      normalised to a monthly figure. Net and collected movement analysis
+      is out of scope and belongs to the analyst layer.
+
+      The net_mrr_change column is the MRR waterfall formula computed inline:
+      new_mrr + expansion_mrr - contraction_mrr - churned_mrr.
+
+      Reactivation MRR is not captured in this model.
+      
+      Upstream: int__mrr_movements.
+    columns:
+      - name: billing_month
+        data_type: date
+        description: "Calendar month this row represents, normalised to first of month (e.g. 2024-01-01)"
+
+      - name: product_id
+        data_type: int64
+        description: "The product associated with this MRR movement contribution"
+
+      - name: plan_id
+        data_type: int64
+        description: "The plan associated with this MRR movement contribution"
+
+      - name: billing_type
+        data_type: string
+        description: "Whether the plan is billed monthly or yearly"
+
+      - name: new_mrr
+        data_type: float64
+        description: >
+          MRR contributed by genuinely new subscriptions in this billing month.
+          Excludes subscriptions created as a result of an upgrade or downgrade.
+          Yearly plan amounts are divided by 12 to normalise to a monthly figure.
+
+      - name: expansion_mrr
+        data_type: float64
+        description: >
+          MRR gained from existing customers upgrading to a higher priced plan.
+          Represents the delta between the new and old plan price, not the full
+          new plan price. Yearly amounts are divided by 12 to normalise to a monthly figure.
+
+      - name: contraction_mrr
+        data_type: float64
+        description: >
+          MRR lost from existing customers downgrading to a lower priced plan.
+          Represents the delta between the old and new plan price, not the full
+          old plan price. Always a positive number representing revenue lost.
+          Yearly amounts are divided by 12 to normalise to a monthly figure.
+
+      - name: churned_mrr
+        data_type: float64
+        description: >
+          MRR lost from subscription cancellations in this billing month.
+          Represents the full normalised plan price of the cancelled subscription.
+          Always a positive number representing revenue lost.
+          Yearly amounts are divided by 12 to normalise to a monthly figure.
+
+      - name: net_mrr_change
+        data_type: float64
+        description: >
+          The net change in MRR for this billing month and dimension combination.
+          Computed as: new_mrr + expansion_mrr - contraction_mrr - churned_mrr.
+          A positive value indicates MRR growth, a negative value indicates MRR decline.

@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: int__mrr_movements
+    description: >
+      Intermediate model that classifies every subscription event into an MRR 
+      movement type. One row per subscription event per movement type.
+      Grain: subscription_id + movement_type.
+      Feeds into mart__mrr_movements where amounts are aggregated into wide format
+      by billing_month, product, plan, and billing_type.
+      Four movement types are captured: new_mrr (genuinely new subscriptions, 
+      excludes upgrade/downgrade created subscriptions), expansion_mrr (upgrades 
+      to higher priced plans), contraction_mrr (downgrades to lower priced plans), 
+      churned_mrr (cancellations). Reactivation MRR is out of scope.
+      All movement amounts are positive — the mart applies sign convention.
+      Yearly plan amounts are divided by 12 to normalise to a monthly figure.
+      Upstream: int__subscription_plan_join.
+    columns:
+      - name: customer_id
+        data_type: int64
+        description: "The customer associated with this movement event"
+
+      - name: subscription_id
+        data_type: int64
+        description: "The subscription that triggered this movement event"
+
+      - name: plan_id
+        data_type: int64
+        description: >
+          The plan associated with this movement. For expansion and contraction, 
+          this is the new plan after the switch, not the old one.
+
+      - name: billing_month
+        data_type: date
+        description: >
+          The calendar month this movement belongs to, normalised to first of month.
+          For new_mrr: date_trunc(start_date, month).
+          For churned_mrr: date_trunc(cancel_date, month).
+          For expansion and contraction: date_trunc(end_date, month) of the old subscription.
+
+      - name: product_id
+        data_type: int64
+        description: >
+          The product associated with this movement. For expansion and contraction,
+          this is the product of the new plan after the switch.
+
+      - name: plan_name
+        data_type: string
+        description: >
+          Name of the plan associated with this movement. For expansion and 
+          contraction, this is the new plan name after the switch.
+
+      - name: billing_type
+        data_type: string
+        description: "Whether the plan is billed monthly or yearly"
+
+      - name: movement_type
+        data_type: string
+        description: >
+          Classification of the MRR movement event. 
+          Possible values: new_mrr, expansion_mrr, contraction_mrr, churned_mrr.
+
+      - name: movement_amount
+        data_type: float64
+        description: >
+          The MRR amount associated with this movement event, always a positive number.
+          For new_mrr and churned_mrr: the normalised plan_price of the subscription.
+          For expansion_mrr: new_plan_price - old_plan_price.
+          For contraction_mrr: old_plan_price - new_plan_price.
+          Yearly amounts are divided by 12 to normalise to a monthly figure.

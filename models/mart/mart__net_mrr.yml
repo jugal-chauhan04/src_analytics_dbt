@@ -1,30 +1,32 @@
 version: 2
-models:
 
+models:
   - name: mart__net_mrr
     description: >
-      Grain: one row per billing_month per product, plan, and billing_type combination.
-      Monthly Net MRR aggregated by billing month and plan dimensions. 
-      
-      Net MRR reflects only the amount invoiced to customers after discounts — the 
-      true revenue expected from active subscriptions.
+      Grain: one row per billing_month per product_id, plan_id, and billing_type.
 
-      Yearly payment amounts are divided by 12 and spread across active months.
-      
+      Net MRR is the revenue actually invoiced to customers after discounts.
+      Yearly invoice amounts are divided by 12 to produce a monthly figure.
+
       Upstream: int__mrr_join
     columns:
       - name: billing_month
         description: "Calendar month this row represents, normalized to first of month (e.g. 2024-01-01)"
+
       - name: product_id
         description: "The product associated with this MRR contribution"
+
       - name: plan_id
         description: "The plan associated with this MRR contribution"
+
       - name: plan_name
         description: "Name of the plan (Free, Pro, Premium)"
+
       - name: billing_type
         description: "Whether the plan is billed monthly or yearly"
+
       - name: net_mrr
         description: >
-          Sum of successfully generated invoiced amount after discounts for this billing month 
-          and dimension combination. Yearly invoiced amounts are divided by 12 
-          to normalize to a monthly figure.
+          Total invoiced amount after discounts for this billing month and dimension combination.
+          Derived from invoice amount_due. Yearly amounts divided by 12 to normalize to a monthly figure.
+          NULL where no invoice was matched for a subscription in this month.
