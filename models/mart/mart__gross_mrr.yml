@@ -29,3 +29,4 @@ models:
         description: >
           Total plan list price for this billing month and dimension combination, before any discounts.
           Derived from plan_price. Yearly amounts divided by 12 to normalize to a monthly figure.
+        

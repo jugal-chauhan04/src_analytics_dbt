@@ -30,3 +30,4 @@ models:
           Total invoiced amount after discounts for this billing month and dimension combination.
           Derived from invoice amount_due. Yearly amounts divided by 12 to normalize to a monthly figure.
           NULL where no invoice was matched for a subscription in this month.
+          

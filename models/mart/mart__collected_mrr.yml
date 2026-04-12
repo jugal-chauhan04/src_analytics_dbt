@@ -12,23 +12,30 @@ models:
       Upstream: int__subscription_payments_join
     columns:
       - name: billing_month
+        data_type: date
         description: "Calendar month this row represents, normalized to first of month (e.g. 2024-01-01)"
 
       - name: product_id
+        data_type: int64
         description: "The product associated with this MRR contribution"
 
       - name: plan_id
+        data_type: int64
         description: "The plan associated with this MRR contribution"
 
       - name: plan_name
+        data_type: string
         description: "Name of the plan (Free, Pro, Premium)"
 
       - name: billing_type
+        data_type: string
         description: "Whether the plan is billed monthly or yearly"
 
       - name: collected_mrr
+        data_type: float64
         description: >
           Total successfully collected payment amounts for this billing month and dimension combination.
           Only includes payments with payment_status = 'success'. Yearly amounts divided by 12
           to normalize to a monthly figure. NULL where no successful payment was collected for a
           subscription in this month.
+        

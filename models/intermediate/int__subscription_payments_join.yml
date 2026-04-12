@@ -29,7 +29,7 @@ models:
       consistent with the gross and net MRR spines.
 
       Upstream: int__subscription_plan_join, stg__invoices, stg__payments
-      Downstream: mart__collected_mrr
+      Downstream: mart__collected_mrr.billing_month
 
     tests:
       - dbt_utils.unique_combination_of_columns:
@@ -37,6 +37,8 @@ models:
             combination_of_columns:
               - subscription_id
               - billing_month
+
+    
     columns:
       - name: subscription_id
         data_type: int64

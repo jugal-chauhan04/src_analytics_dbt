@@ -19,6 +19,12 @@ models:
       All movement amounts are positive — the mart applies sign convention.
       Yearly plan amounts are divided by 12 to normalise to a monthly figure.
       Upstream: int__subscription_plan_join.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - subscription_id
+              - movement_type
     columns:
       - name: customer_id
         data_type: int64
@@ -72,3 +78,5 @@ models:
           For expansion_mrr: new_plan_price - old_plan_price.
           For contraction_mrr: old_plan_price - new_plan_price.
           Yearly amounts are divided by 12 to normalise to a monthly figure.
+        tests:
+          - not_null
