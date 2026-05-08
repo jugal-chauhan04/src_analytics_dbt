@@ -10,3 +10,4 @@ with staging_invoices as(
 )
 
 select * from staging_invoices
+
